@@ -6,30 +6,25 @@ import Data.Maybe (maybe)
 integerToRomanString :: Integer -> Maybe String
 integerToRomanString v =
   let
+    formTriplet :: Integer -> String -> [(String, Integer)]
+    formTriplet num c =
+      [ (c ++ c ++ c, num * 3)
+      , (c ++ c, num * 2)
+      , (c, num)
+      ]
+
+    numeralSequence :: Integer -> (String, String, String, String) -> [(String, Integer)]
+    numeralSequence baseNum (nine, five, four, one) =
+      (nine, baseNum * 9) : (five, baseNum * 5) : (four, baseNum * 4) : formTriplet baseNum one
+
     sortedVals :: [(String, Integer)]
     sortedVals =
-      [("MMM", 3000)
-      ,("MM",  2000)
-      ,("M",   1000)
-      ,("CM",   900)
-      ,("D",    500)
-      ,("CD",   400)
-      ,("CCC",  300)
-      ,("CC",   200)
-      ,("C",    100)
-      ,("XC",    90)
-      ,("L",     50)
-      ,("XL",    40)
-      ,("XXX",   30)
-      ,("XX",    20)
-      ,("X",     10)
-      ,("IX",     9)
-      ,("V",      5)
-      ,("IV",     4)
-      ,("III",    3)
-      ,("II",     2)
-      ,("I",      1)
-      ]
+      concat
+        [ formTriplet     1000 "M"
+        , numeralSequence  100 ("CM", "D", "CD", "C")
+        , numeralSequence   10 ("XC", "L", "XL", "X")
+        , numeralSequence    1 ("IX", "V", "IV", "I")
+        ]
   in do
     (str, num) <- find ((1 ==) . div v . snd) sortedVals
     return $ maybe str (str ++) (integerToRomanString (v - num))
